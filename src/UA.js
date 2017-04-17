@@ -961,7 +961,9 @@ UA.prototype.loadConfig = function(configuration) {
         return new SIP.DigestAuthentication(ua);
       }),
 
-      allowLegacyNotifications: false
+      allowLegacyNotifications: false,
+
+      rtcwebBreaker: null
     };
 
   // Pre-Configuration
@@ -1100,12 +1102,17 @@ UA.prototype.loadConfig = function(configuration) {
       var
         anonymous = options.anonymous || null,
         outbound = options.outbound || null,
+        rtcwebBreaker = options.rtcwebBreaker,
         contact = '<';
 
       if (anonymous) {
         contact += (this.temp_gruu || ('sip:anonymous@anonymous.invalid;transport='+settings.contactTransport)).toString();
       } else {
         contact += (this.pub_gruu || this.uri).toString();
+      }
+
+      if(rtcwebBreaker !== null) {
+        contact += ';rtcweb-breaker=' + rtcwebBreaker ? 'yes' : 'no';
       }
 
       if (outbound) {

@@ -6362,6 +6362,9 @@ InviteClientContext = function(ua, target, options) {
   // Set anonymous property
   this.anonymous = options.anonymous || false;
 
+  // Set Rtcweb Breaker property
+  this.rtcwebBreaker = options.rtcwebBreaker;
+
   // Custom data to be sent either in INVITE or in ACK
   this.renderbody = options.renderbody || null;
   this.rendertype = options.rendertype || 'text/plain';
@@ -6373,7 +6376,8 @@ InviteClientContext = function(ua, target, options) {
    */
   this.contact = ua.contact.toString({
     anonymous: this.anonymous,
-    outbound: this.anonymous ? !ua.contact.temp_gruu : !ua.contact.pub_gruu
+    outbound: this.anonymous ? !ua.contact.temp_gruu : !ua.contact.pub_gruu,
+    rtcwebBreaker: this.rtcwebBreaker
   });
 
   if (this.anonymous) {
@@ -9583,7 +9587,9 @@ UA.prototype.loadConfig = function(configuration) {
         return new SIP.DigestAuthentication(ua);
       }),
 
-      allowLegacyNotifications: false
+      allowLegacyNotifications: false,
+
+      rtcwebBreaker: null
     };
 
   // Pre-Configuration
@@ -9722,12 +9728,17 @@ UA.prototype.loadConfig = function(configuration) {
       var
         anonymous = options.anonymous || null,
         outbound = options.outbound || null,
+        rtcwebBreaker = options.rtcwebBreaker,
         contact = '<';
 
       if (anonymous) {
         contact += (this.temp_gruu || ('sip:anonymous@anonymous.invalid;transport='+settings.contactTransport)).toString();
       } else {
         contact += (this.pub_gruu || this.uri).toString();
+      }
+
+      if(rtcwebBreaker !== null) {
+        contact += ';rtcweb-breaker=' + rtcwebBreaker ? 'yes' : 'no';
       }
 
       if (outbound) {
